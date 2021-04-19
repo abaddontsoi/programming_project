@@ -1,6 +1,5 @@
 ﻿#include <iostream>
 #include <string>
-#include <sstream>
 
 using namespace std;
 using std::cout;
@@ -212,7 +211,7 @@ int setColIndex(string indexString) {
 
 int NumOfLetterCheck(string input) {
 	int letter_count = 0;
-	for (int i = 0; i < input.length(); i++)
+	for (unsigned int i = 0; i < input.length(); i++)
 	{
 		for (int j = 0; j < 26; j++) {
 			if (input[i] == seatDigitCheck[j] || input[i] == seatLowerDigitCheck[j])
@@ -375,15 +374,13 @@ int main()
 		}
 		else if (choice == "2")
 		{
-			string name_del = "*";
 			string id_del = "*";
 			
 			int name_del_stat = 0;
 			int id_del_stat = 0;
 
 			cout << "Data deletion sequence activated." << endl;
-			cout << "Enter user's name and passport ID to match the record you want to delete: " << endl;
-			cin >> name_del;
+			cout << "Enter user's passport ID to match the record you want to delete: " << endl;
 			cin >> id_del;
 			string del_choice;
 
@@ -400,7 +397,7 @@ int main()
 					}
 				}
 			}
-			cout << id_del_stat << " record found.\n" << endl;
+			cout << id_del_stat << " record(s) found.\n" << endl;
 			if (id_del_stat > 0)
 			{
 				cout << "Delete all records that match the search result? ([y]es or [n]o)" << endl;
