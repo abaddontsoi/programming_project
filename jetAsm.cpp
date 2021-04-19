@@ -8,55 +8,9 @@ using std::cout;
 const int row = 13;
 const int col = 6;
 
-/*class FinSeat {
-private:
-	string CusName;
-	string CusId;
-	string CusSeat;
-	string SeatCol;
-	string SeatRow;
-	string RawSeat;
-	string Raw;
-
-public:
-	FinSeat() {}
-
-	string setName(string input) {
-		CusName = input;
-		return input;
-	}
-
-	string setId(string input) {
-		CusId = input;
-		return input;
-	}
-
-	int setSeatCol(int input) {
-		SeatCol = input;
-		return input;
-	}
-
-	int setSeatRow(int input) {
-		SeatRow = input;
-		return input;
-	}
-
-	string setSeat() {
-		stringstream ss;
-		string seat;
-
-		ss << SeatRow << SeatCol;
-
-		seat = ss.str();
-
-		RawSeat = seat;
-
-		return seat;
-	}
-}; */
-
 string seatDigitCheck = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 string seatLowerDigitCheck = "abcdefghijklmnopqrstuvwxyz";
+string rowNumberCheck[13] = { "1","2","3","4","5","6","7","8","9","10","11","12","13" };
 
 class Passenger {
 private:
@@ -80,7 +34,7 @@ public:
 		Seat_num = seat_num;
 	}
 	void showDetail() {
-		cout << Name << " " << Id << " " << Seat_num << endl;
+		cout << Name << "/" << Id << "/" << Seat_num << endl;
 	}
 	string getName(string name) {
 		Name = name;
@@ -168,43 +122,31 @@ public:
 	}
 };
 
-/*
-* string o5(){
-	string choice;
-
-	do
+bool rowCheck(string input) {
+	int string_lenght = input.length();
+	int inputType = (string_lenght == 2) ? 2 : (string_lenght == 3) ? 3 : 0;
+	int matchCount = 0;
+	if (inputType == 0)
 	{
-		cout << "*** Details ***" << endl;
-		cout << "[1] Passenger" << endl;
-		cout << "[2] Class" << endl;
-		cout << "[3] Back" << endl;
-		cout << "*****************" << endl;
-		cout << "Option (1-3): " << endl;
-		cin >> choice;
-		if (choice == "1")
+		return false;
+	}
+	string rowString = (inputType == 2) ? input.substr(0, 1) : (inputType == 3) ? input.substr(0, 2) : " ";
+	for (int i = 0; i < row; i++)
+	{
+		if (rowString == rowNumberCheck[i])
 		{
-			cout << choice << endl;
-			
+			matchCount++;
 		}
-		else if (choice == "2")
-		{
-			cout << choice << endl;
-
-		}
-		else if (choice == "3")
-		{
-			cout << choice << endl;
-
-		}
-		else
-		{
-			cout << "No such option, please check your input." << endl;
-		}
-	} while (choice != "3");
-	return choice;
+	}
+	if (matchCount == 1)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
-*/
-
 
 int idCheck(Passenger obj[row][col], string id) {
 	int id_count = 0;
@@ -234,27 +176,6 @@ int seatRepeatedCheck(Passenger obj[row][col], string seat) {
 	return seat_count;
 }
 
-/*
-template <typename T>
-void printSeats(T(&seats)) {
-	cout << "\t";
-	for (int i = 0; i < 6; i++)
-	{
-		cout << i + 1 << "\t";
-	}
-	cout << endl;
-	for (int i = 0; i < 13; i++)
-	{
-		cout << i + 1 << "\t";
-		for (int j = 0; j < 6; j++)
-		{
-			cout << seats[i][j] << "\t";
-		}
-		cout << endl;
-	}
-}
-
-*/
 
 int setColIndex(string indexString) {
 	int index = 0;
@@ -314,6 +235,19 @@ int first_digit_check(string input) {
 	return first_digit_stat;
 }
 
+int checkSpace(string input) {
+	int leng = input.length();
+	int blankCount = 0;
+	for (int i = 0; i < leng; i++)
+	{
+		if (input[i] == ' ')
+		{
+			blankCount++;
+		}
+	}
+	return blankCount;
+}
+
 int main()
 {
 	string choice;
@@ -321,6 +255,14 @@ int main()
 	string id;
 	string seat_num;
 	Passenger tmp_passenger;
+
+	string batchString;
+	string batchName = "*";
+	string batchID = "*";
+	string batchSeat = "*";
+	string batchSeatRow = "*";
+	string batchSeatCol = "*";
+
 
 	Passenger fin_detail[row][col];
 
@@ -348,23 +290,18 @@ int main()
 		cout << "\n\n";
 
 		if (choice=="1") {
-			cout << "enter tmp_passenger's name, id and seat number: "<< endl;
-			//cin >> name >> id >> seat_num;
+			cout << "enter passenger's name, id and seat code: "<< endl;
 			cout << "Name: ";
 			cin >> name;
 
 			cout << "ID: ";
 			cin >> id;
 
-			/*for (int i = 0; i < row; i++)
+			if (checkSpace(id) != 0)
 			{
-				for (int j = 0; j < col; j++) {
-					if (fin_detail[i][j].expId() == id)
-					{
-						id_count++;
-					}
-				}
-			}*/
+				cout << "ID cannot contain any space, the progress is aborted." << endl;
+				continue;
+			}
 
 			if (idCheck(fin_detail, id) != 0)
 			{
@@ -382,6 +319,12 @@ int main()
 				continue;
 			}
 
+			if (checkSpace(seat_num) != 0)
+			{
+				cout << "ID cannot contain any space, the progress is aborted." << endl;
+				continue;
+			}
+
 			if (first_digit_check(seat_num) != 0)
 			{
 				cout << "\nThe first digit of seat code should not be a letter, the progress is aborted.\n" << endl;
@@ -390,7 +333,13 @@ int main()
 
 			if (NumOfLetterCheck(seat_num) != 1)
 			{
-				cout << "\nThe seat code entered contains more than one letter, which is not allowed, the progress is aborted.\n" << endl;
+				cout << "\nThe seat code entered contains more than one letter or no letter, which is not allowed, the progress is aborted.\n" << endl;
+				continue;
+			}
+
+			if (rowCheck(seat_num) != 1)
+			{
+				cout << "\nYour row number in the seat code input is out of the range of 1 to 13, the progress is aborted.\n" << endl;
 				continue;
 			}
 
@@ -401,16 +350,12 @@ int main()
 				continue;
 			}
 
-			//fin_detail[tmp_passenger.getRow(seat_num)][tmp_passenger.getCol(seat_num)];
-			
 			Raw_row = stoi(tmp_passenger.getRow(seat_num));
 			rowIndex = Raw_row - 1;
 
 			indexstring = tmp_passenger.getCol(seat_num);
-			//cout << indexstring << endl;
 
 			colIndex = setColIndex(indexstring) - 1;
-			//cout << colIndex << endl;
 
 			if (colIndex < 0)
 			{
@@ -425,8 +370,6 @@ int main()
 			fin_detail[rowIndex][colIndex].getCol(seat_num);
 			fin_detail[rowIndex][colIndex].getRow(seat_num);
 
-			//cout << rowIndex << endl;
-			//cout << colIndex << endl;
 
 			
 		}
@@ -444,7 +387,7 @@ int main()
 			cin >> id_del;
 			string del_choice;
 
-			cout << "\nThe following are matched data. if there are no matched record, the list shows nothing: " << endl;
+			cout << "\nThe following are matched data. If there are no matched record, the list shows nothing: " << endl;
 
 			for (int i = 0; i < row; i++)
 			{
@@ -482,8 +425,122 @@ int main()
 			}
 		}
 		else if (choice == "3")
-		{
-			break;
+			{
+			cout << "Enter data in the format of [name/id/seat code]:" ;
+			do
+			{
+				cin >> batchString;
+
+				if (batchString == "0")
+				{
+					continue;
+				}
+
+				int len;
+				int pos;
+
+				pos = batchString.find_first_of("/");
+				batchName = batchString.substr(0, pos);
+
+				len = batchName.length();
+				batchString.erase(batchString.find(batchName), len + 1);
+				if (batchName.length() == 0)
+				{
+					cout << "\nName of the passenger should not be empty, the progress is aborted.\n" << endl;
+					break;
+				}
+
+				pos = batchString.find_first_of("/");
+				batchID = batchString.substr(0, pos);
+				if (batchID.length()==0)
+				{
+					cout << "\nID of the passenger should not be empty, the progress is aborted.\n" << endl;
+					break;
+				}
+				if (idCheck(fin_detail, batchID) != 0)
+				{
+					cout << "\nID already exists or empty, the progress is aborted.\n" << endl;
+					break;
+				}
+
+
+				len = batchID.length();
+				batchString.erase(batchString.find(batchID), len + 1);
+
+
+				pos = batchString.find_first_of("/");
+				if (pos == -1)
+				{
+					batchSeat = batchString;
+					len = batchSeat.length();
+					if (batchSeat.length()!=0)
+					{
+						// check the length of input, only 2 - 3 digit is accepted.
+						if (batchSeat.length() > 3 or batchSeat.length() < 2)
+						{
+							cout << "\nOnly 2 or 3 digit of seat code can be accepted, the progress is aborted.\n" << endl;
+							break;
+						}
+
+						if (first_digit_check(batchSeat) != 0)
+						{
+							cout << "\nThe first digit of seat code should not be a letter, the progress is aborted.\n" << endl;
+							break;
+						}
+
+						if (NumOfLetterCheck(batchSeat) != 1)
+						{
+							cout << "\nThe seat code entered contains more than one letter or no letter, which is not allowed, the progress is aborted.\n" << endl;
+							break;
+						}
+
+						if (rowCheck(batchSeat) != 1)
+						{
+							cout << "\nYour row number in the seat code input is out of the range of 1 to 13, the progress is aborted.\n" << endl;
+							break;
+						}
+
+						// check the availability of a seat, return 0 if the desire seat is available.
+						if (seatRepeatedCheck(fin_detail, batchSeat) != 0)
+						{
+							cout << "\nSeat occupied, the progress is aborted.\n" << endl;
+							break;
+						}
+
+
+						Raw_row = stoi(tmp_passenger.getRow(batchSeat));
+						rowIndex = Raw_row - 1;
+
+						indexstring = tmp_passenger.getCol(batchSeat);
+
+						colIndex = setColIndex(indexstring) - 1;
+
+						if (colIndex < 0)
+						{
+							cout << "\nYou may entered lowercase letter or letter not among A to F, the progress is aborted.\n" << endl;
+							break;
+						}
+
+						fin_detail[rowIndex][colIndex].getId(tmp_passenger.getId(batchID));
+						fin_detail[rowIndex][colIndex].getName(tmp_passenger.getName(batchName));
+						fin_detail[rowIndex][colIndex].getSeat(tmp_passenger.getSeat(seat_num));
+
+						fin_detail[rowIndex][colIndex].getCol(batchSeat);
+						fin_detail[rowIndex][colIndex].getRow(batchSeat);
+
+					}
+					else {
+						cout << "\nNo seat code can be collected, the progress is aborted.\n" << endl;
+						break;
+					}
+					batchString.erase(batchString.find(batchSeat), len + 1);
+				}
+				else
+				{
+					cout << "\nYou have entered too many arguments, the progress is aborted\n" << endl;
+					break;
+				}
+			} while (batchString != "0");
 		}
 		else if (choice == "4")
 		{
@@ -494,7 +551,7 @@ int main()
 				}
 				else
 				{
-					cout << i << "\t";
+					cout << seatDigitCheck[i-1] << "\t";
 				}
 			}
 			cout << endl;
@@ -529,7 +586,7 @@ int main()
 				{
 					int search_stat = 0;
 					string search_key;
-					cout << "Please enter the particular ID to list the details of that passenger: ";
+					cout << "Please enter an ID to list the details of that passenger: ";
 					cin >> search_key;
 					for (int i = 0; i < row; i++)
 					{
@@ -545,13 +602,75 @@ int main()
 				}
 				else if (choice == "2")
 				{
-					cout << choice << endl;
+					char crt5_choice;
+					char classType[3] = { 'F','B','E' };
+					cout << "Please enter which type of seats you would like to show: ([F]irst class, [B]usiness, [E]conomy) ";
+					
+					cin >> crt5_choice;
+					int search_key = (crt5_choice == classType[0]) ? 1 : (crt5_choice == classType[1]) ? 2 : (crt5_choice == classType[2]) ? 3 : 0;
+					switch (search_key)
+					{
+					case 1:
+						cout << "The followings are seat status from 1A to 2F." << endl;
+						for (int i = 0; i < 2; i++)
+						{
+							for (int j = 0; j < 6; j++)
+							{
+								if (fin_detail[i][j].isOcup() == 1)
+								{
+									cout << "vacant" << endl;
+								}
+								else
+								{
+									fin_detail[i][j].showDetail();
+								}
+							}
+						}
+						break;
+					case 2:
+						cout << "The followings are seat status from 3A to 7F." << endl;
 
+						for (int i = 2; i < 7; i++)
+						{
+							for (int j = 0; j < 6; j++)
+							{
+								if (fin_detail[i][j].isOcup() == 1)
+								{
+									cout << "vacant" << endl;
+								}
+								else
+								{
+									fin_detail[i][j].showDetail();
+								}
+							}
+						}
+						break;
+					case 3:
+						cout << "The followings are seat status from 8A to 13F." << endl;
+
+						for (int i = 7; i < 13; i++)
+						{
+							for (int j = 0; j < 6; j++)
+							{
+								if (fin_detail[i][j].isOcup() == 1)
+								{
+									cout << "vacant" << endl;
+								}
+								else
+								{
+									fin_detail[i][j].showDetail();
+								}
+							}
+						}
+						break;
+					default:
+						cout << "No such class type, aborting" << endl;
+						break;
+					}
 				}
 				else if (choice == "3")
 				{
 					cout << "\nIs going back to the main menu... \n" << endl;
-
 				}
 				else
 				{
