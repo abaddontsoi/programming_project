@@ -3,6 +3,7 @@
 
 using namespace std;
 using std::cout;
+using std::cin;
 
 const int row = 13;
 const int col = 6;
@@ -247,6 +248,53 @@ int checkSpace(string input) {
 	return blankCount;
 }
 
+bool checkBatchSeat(string input) {
+	int len = input.length();
+	int count = 0;
+	for (int i = 0; i < len; i++)
+	{
+		if (input[i] == '/' or input[i] == '\'') {
+			count++ ;
+		}
+	}
+	if (count == 0)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+int colCheck(string input) {
+	int count = 0;
+
+	for (int i = 0; i < 6; i++)
+	{
+		if (input[input.length() - 1] == seatDigitCheck[i])
+			count++;
+	}
+	return count;
+}
+
+bool batchRepeatCheck( string array[], string input) {
+	int count = 0;
+	for (int i = 0; i < row*col; i++)
+	{
+		if (input == array[i]) {
+			count++;
+		}
+	}
+	if (count == 0)
+	{
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 int main()
 {
 	string choice;
@@ -259,8 +307,14 @@ int main()
 	string batchName = "*";
 	string batchID = "*";
 	string batchSeat = "*";
-	string batchSeatRow = "*";
-	string batchSeatCol = "*";
+	string batchIDRecord[row * col] = {" "};
+	//int IDCount = 0;
+	string batchSeatRecord[row * col] = {" "};
+	//int SeatCount = 0;
+
+	int batchCount = 0;
+	int errorCount = 0;
+	int successCount = 0;
 
 
 	Passenger fin_detail[row][col];
@@ -284,14 +338,14 @@ int main()
 		cout << "[6] Exit" << endl;
 		cout << "*****************" << endl;
 		cout << "Option (1-6): ";
-		cin >> choice;
+		std::cin >> choice;
 
 		cout << "\n\n";
 
 		if (choice=="1") {
 			cout << "enter passenger's name, id and seat code: "<< endl;
 			cout << "Name: ";
-			cin >> name;
+			std::cin >> name;
 
 			cout << "ID: ";
 			cin >> id;
@@ -422,88 +476,218 @@ int main()
 			}
 		}
 		else if (choice == "3")
-			{
-			cout << "Enter data in the format of [name/id/seat code]:" ;
+		{
+			cout << "Enter data in the format of [name/id/seat code]: \n" ;
+			string temp[500];
+			string success[500];
+			string failed[500];
+			batchCount = 0;
+			errorCount = 0;
+			successCount = 0;
+			
+			// check the format of input
+			// all incorrect format of input will be moved to failed list
+			// inputs that passed the check will be moved to success list
 			do
 			{
-				cin >> batchString;
+				// initialize all variable for the loop
+				batchName = " ";
+				batchID = " ";
+				batchSeat = " ";
+				batchString = " ";
 
-				if (batchString == "0")
+				string temp = " ";
+
+				int len = 0;
+				int pos = 0;
+
+				cin >> batchString;
+				if (batchString =="0")
 				{
 					continue;
 				}
 
-				int len;
-				int pos;
+				temp = batchString;
 
-				pos = batchString.find_first_of("/");
-				batchName = batchString.substr(0, pos);
-
+				pos = temp.find_first_of("/");
+				batchName = temp.substr(0, pos);
 				len = batchName.length();
-				batchString.erase(batchString.find(batchName), len + 1);
-				if (batchName.length() == 0)
-				{
-					cout << "\nName of the passenger should not be empty, the progress is aborted.\n" << endl;
-					break;
-				}
 
-				pos = batchString.find_first_of("/");
-				batchID = batchString.substr(0, pos);
-				if (batchID.length()==0)
+				if (pos != -1 and len > 0)
 				{
-					cout << "\nID of the passenger should not be empty, the progress is aborted.\n" << endl;
-					break;
+					cout << "Name received" << endl;
 				}
-				if (idCheck(fin_detail, batchID) != 0)
+				else
 				{
-					cout << "\nID already exists or empty, the progress is aborted.\n" << endl;
-					break;
+					cout << "No name" << endl;
+					failed[errorCount] = batchString;
+					errorCount++;
+					batchString = " ";
+					temp = " ";
+					continue;
 				}
+				len = batchName.length();
+				temp.erase(temp.find(batchName), len + 1);
 
+
+				pos = temp.find_first_of("/");
+				batchID = temp.substr(0, pos);
 
 				len = batchID.length();
-				batchString.erase(batchString.find(batchID), len + 1);
 
-
-				pos = batchString.find_first_of("/");
-				if (pos == -1)
+				if (pos != -1 and len>0)
 				{
-					batchSeat = batchString;
-					len = batchSeat.length();
-					if (batchSeat.length()!=0)
+					cout << "ID received\n";
+					if (idCheck(fin_detail, batchID) != 0 or batchRepeatCheck(batchIDRecord, batchID) == false)
 					{
-						// check the length of input, only 2 - 3 digit is accepted.
-						if (batchSeat.length() > 3 or batchSeat.length() < 2)
-						{
-							cout << "\nOnly 2 or 3 digit of seat code can be accepted, the progress is aborted.\n" << endl;
-							break;
-						}
+						//cout << "\nID already exists or empty, the progress is aborted.\n" << endl;
+						cout << "ID invalid" << endl;
+						failed[errorCount] = batchString;
+						errorCount++;
+						batchString = " ";
+						temp = " ";
+						continue;
+					}
+				}
+				else
+				{
+					cout << "No id" << endl;
+					failed[errorCount] = batchString;
+					errorCount++;
+					batchString = " ";
+					temp = " ";
+					continue;
+				}
+				batchIDRecord[batchCount] = batchID;
+				temp.erase(temp.find(batchID), len + 1);
 
-						if (first_digit_check(batchSeat) != 0)
-						{
-							cout << "\nThe first digit of seat code should not be a letter, the progress is aborted.\n" << endl;
-							break;
-						}
+				pos = 0;
+				batchSeat = temp;
+				len = batchSeat.length();
 
-						if (NumOfLetterCheck(batchSeat) != 1)
-						{
-							cout << "\nThe seat code entered contains more than one letter or no letter, which is not allowed, the progress is aborted.\n" << endl;
-							break;
-						}
+				if (checkBatchSeat(batchSeat) != 0 and len>0)
+				{
+					cout << "No unexpected \'/\'" << endl;
+					if (len > 3 or len < 2)
+					{
+						//cout << "\nOnly 2 or 3 digit of seat code can be accepted, the progress is aborted.\n" << endl;
+						cout << "Length of seat code is not in range(2-3)." << endl;
+						failed[errorCount] = batchString;
+						errorCount++;
+						batchString = " ";
+						temp = " ";
 
-						if (rowCheck(batchSeat) != 1)
-						{
-							cout << "\nYour row number in the seat code input is out of the range of 1 to 13, the progress is aborted.\n" << endl;
-							break;
-						}
+						continue;
+					}
 
-						// check the availability of a seat, return 0 if the desire seat is available.
-						if (seatRepeatedCheck(fin_detail, batchSeat) != 0)
-						{
-							cout << "\nSeat occupied, the progress is aborted.\n" << endl;
-							break;
-						}
+					if (first_digit_check(batchSeat) != 0)
+					{
+						cout << "The first digit is not a number" << endl;
+						failed[errorCount] = batchString;
+						errorCount++;
+						batchString = " ";
+						temp = " ";
+						continue;
+					}
 
+					if (rowCheck(batchSeat) == 0)
+					{
+						cout << "Cant pass row check" << endl;
+						failed[errorCount] = batchString;
+						errorCount++;
+						batchString = " ";
+						temp = " ";
+
+						continue;
+					}
+
+					if (NumOfLetterCheck(batchSeat) != 1)
+					{
+						cout << "There are too many letter in the seat code\n";
+						failed[errorCount] = batchString;
+						errorCount++;
+						batchString = " ";
+						temp = " ";
+
+						continue;
+					}
+
+					// check the availability of a seat, return 0 if the desire seat is available.
+					if (seatRepeatedCheck(fin_detail, batchSeat) != 0 or batchRepeatCheck(batchSeatRecord, batchSeat) == false)
+					{
+						cout << "Seat occupied \n";
+						failed[errorCount] = batchString;
+						errorCount++;
+						batchString = " ";
+						temp = " ";
+						continue;
+					}
+
+					if (colCheck(batchSeat) != 1)
+					{
+						cout << "The letter received is unexpected, or there is no letter\n";
+						failed[errorCount] = batchString;
+						errorCount++;
+						batchString = " ";
+						temp = " ";
+						continue;
+					}
+				}
+				else {
+					cout << "Have extra \'/\' or no seat code." << endl;
+					failed[errorCount] = batchString;
+					errorCount++;
+					batchString = " ";
+					temp = " ";
+					continue;
+				}
+
+				temp.erase(temp.find(batchSeat), len + 1);
+
+				success[successCount] = batchString;
+				successCount++;
+				batchString = " ";
+				temp = " ";
+			} while (batchString != "0");
+			
+			cout << "\n==== The following(s) is/are request(s) that violates at least one check: ====" << endl;
+
+			for (int i = 0; i < errorCount; i++)
+			{
+				cout << failed[i] << endl;
+			}
+
+			cout << "\n==== The following(s) is/are request(s) that do not violate any check: ====" << endl;
+
+			for (int i = 0; i < successCount; i++)
+			{
+				cout << success[i] << endl;
+			}
+			string crt3_choice;
+
+			do
+			{
+				cout << "\nCommit successful request(s)? (enter [y]es to commit successful request(s) or [n]o to abort) \n";
+				cout << "CAUTION: You have only ONE chance to commit those successful requests. \nIf you enter \'n\' in this section, all successful requests will be LOST.\n";
+				cin >> crt3_choice;
+				if (crt3_choice == "y")
+				{
+					for (int i = 0; i < successCount; i++) {
+						int pos = 0;
+						int len = 0;
+
+						pos = success[i].find_first_of("/");
+						batchName = success[i].substr(0, pos);
+						len = batchName.length();
+						success[i].erase(success[i].find(batchName), len + 1);
+
+
+						pos = success[i].find_first_of("/");
+						batchID = success[i].substr(0, pos);
+						len = batchID.length();
+						success[i].erase(success[i].find(batchID), len + 1);
+
+						batchSeat = success[i];
 
 						Raw_row = stoi(tmp_passenger.getRow(batchSeat));
 						rowIndex = Raw_row - 1;
@@ -512,32 +696,174 @@ int main()
 
 						colIndex = setColIndex(indexstring) - 1;
 
-						if (colIndex < 0)
-						{
-							cout << "\nYou may entered lowercase letter or letter not among A to F, the progress is aborted.\n" << endl;
-							break;
-						}
-
 						fin_detail[rowIndex][colIndex].getId(tmp_passenger.getId(batchID));
 						fin_detail[rowIndex][colIndex].getName(tmp_passenger.getName(batchName));
-						fin_detail[rowIndex][colIndex].getSeat(tmp_passenger.getSeat(seat_num));
+						fin_detail[rowIndex][colIndex].getSeat(tmp_passenger.getSeat(batchSeat));
 
 						fin_detail[rowIndex][colIndex].getCol(batchSeat);
 						fin_detail[rowIndex][colIndex].getRow(batchSeat);
 
+						success[i] = "*";
 					}
-					else {
-						cout << "\nNo seat code can be collected, the progress is aborted.\n" << endl;
-						break;
-					}
-					batchString.erase(batchString.find(batchSeat), len + 1);
-				}
-				else
-				{
-					cout << "\nYou have entered too many arguments, the progress is aborted\n" << endl;
+					successCount = 0;
+					cout << "Commit successful.\n\n";
 					break;
 				}
-			} while (batchString != "0");
+
+				cout << "No such option, please anter again. ";
+			} while (crt3_choice != "y" and crt3_choice != "n");
+
+			if (errorCount == 0)
+			{
+				cout << "No failed request(s) detected.\n\n";
+			}
+
+			while (errorCount > 0)
+			{
+				cout << "Failed requests detected, modify?\n\n";
+				cout << "Enter [y]es to modify, [n]o to leave.\n\n";
+				cout << "CAUTION [1]: ALL FAILED requests can NOT be retrieved again, once you have chosen [n] as your option.\n\n";
+				string correctionChoice;
+				cin >> correctionChoice;
+				if (correctionChoice == "n")
+				{
+					break;
+				}
+				if (correctionChoice == "y")
+				{
+					for (int i = 0; i < errorCount;i++ ) {
+						string fixName;
+						string fixID;
+						string fixSeat;
+						string fixString;
+
+						cout << "Current failed request: " << failed[i] << endl;
+
+						cout << "Please enter passenger's name: ";
+						cin >> fixName;
+
+						cout << "Please enter passenger's ID: ";
+						cin >> fixID;
+
+						cout << "Please enter passenger's seat code: ";
+						cin >> fixSeat;
+
+						fixString = fixName + '/' + fixID + '/' + fixSeat;
+
+						if (fixName.length()<1)
+						{
+							failed[i] = fixString;
+							continue;
+						}
+
+						if (fixID.length()<1 or checkSpace(fixID) != 0)
+						{
+							failed[i] = fixString;
+							continue;
+						}
+						if (idCheck(fin_detail, fixID)!=0 or batchRepeatCheck(batchIDRecord, fixID)==false)
+						{
+							failed[i] = fixString;
+							continue;
+						}
+						int len = fixSeat.length();
+						if (checkBatchSeat(fixSeat) != 0 and len > 0)
+						{
+							cout << "No unecpected \'/\'" << endl;
+							if (len > 3 or len < 2)
+							{
+								//cout << "\nOnly 2 or 3 digit of seat code can be accepted, the progress is aborted.\n" << endl;
+								cout << "Length of seat code is not in range(2-3)." << endl;
+								failed[i] = fixString;
+								continue;
+							}
+
+							if (first_digit_check(fixSeat) != 0)
+							{
+								cout << "The first digit is not a number" << endl;
+								failed[i] = fixString;
+								continue;
+							}
+
+							if (rowCheck(fixSeat) == 0)
+							{
+								cout << "Cant pass row check" << endl;
+								failed[i] = fixString;
+								continue;
+							}
+
+							if (NumOfLetterCheck(fixSeat) != 1)
+							{
+								cout << "There are too many letter in the seat code\n";
+								failed[i] = fixString;
+								continue;
+							}
+
+							// check the availability of a seat, return 0 if the desire seat is available.
+							if (seatRepeatedCheck(fin_detail, fixSeat) != 0 or batchRepeatCheck(batchSeatRecord, fixSeat) == false)
+							{
+								cout << "Seat occupied \n";
+								failed[i] = fixString;
+								continue;
+							}
+
+							if (colCheck(fixSeat) != 1)
+							{
+								cout << "The letter received is unexpected, or there is no letter\n";
+								failed[i] = fixString;
+								continue;
+							}
+						}	
+						success[i] = fixString;
+						successCount++;
+					}
+				}
+				errorCount = 0;
+			}
+
+			for (int i = 0; i < successCount; i++)
+			{
+				batchName = " ";
+				batchID = " ";
+				batchSeat = " ";
+
+				int pos = 0;
+				int len = 0;
+
+				pos = success[i].find_first_of("/");
+				batchName = success[i].substr(0, pos);
+				len = batchName.length();
+				success[i].erase(success[i].find(batchName), len + 1);
+
+
+				pos = success[i].find_first_of("/");
+				batchID = success[i].substr(0, pos);
+				len = batchID.length();
+				success[i].erase(success[i].find(batchID), len + 1);
+
+				batchSeat = success[i];
+
+				Raw_row = stoi(tmp_passenger.getRow(batchSeat));
+				rowIndex = Raw_row - 1;
+
+				indexstring = tmp_passenger.getCol(batchSeat);
+
+				colIndex = setColIndex(indexstring) - 1;
+
+				fin_detail[rowIndex][colIndex].getId(tmp_passenger.getId(batchID));
+				fin_detail[rowIndex][colIndex].getName(tmp_passenger.getName(batchName));
+				fin_detail[rowIndex][colIndex].getSeat(tmp_passenger.getSeat(batchSeat));
+
+				fin_detail[rowIndex][colIndex].getCol(batchSeat);
+				fin_detail[rowIndex][colIndex].getRow(batchSeat);
+
+				success[i] = "*";
+
+			}
+
+			batchCount = 0;
+			errorCount = 0;
+			successCount = 0;
 		}
 		else if (choice == "4")
 		{
@@ -619,7 +945,7 @@ int main()
 								}
 								else
 								{
-									fin_detail[i][j].showDetail();
+									cout << fin_detail[i][j].expName() << "/" << fin_detail[i][j].expId() << "/" << fin_detail[i][j].expSeat() << endl;
 								}
 							}
 						}
@@ -637,7 +963,7 @@ int main()
 								}
 								else
 								{
-									fin_detail[i][j].showDetail();
+									cout << fin_detail[i][j].expName() << "/" << fin_detail[i][j].expId() << "/" << fin_detail[i][j].expSeat() << endl;
 								}
 							}
 						}
@@ -655,7 +981,7 @@ int main()
 								}
 								else
 								{
-									fin_detail[i][j].showDetail();
+									cout << fin_detail[i][j].expName() << "/" << fin_detail[i][j].expId() << "/" << fin_detail[i][j].expSeat() << endl;
 								}
 							}
 						}
